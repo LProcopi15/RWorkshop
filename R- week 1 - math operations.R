@@ -10,6 +10,7 @@
 0/0
 #You can create variables to store the result of your calculation
 result <- 1+4/2
+result = 1+4/2
 result
 result2 <- result*7
 result2
@@ -211,7 +212,9 @@ solve(A,b)
 ##########################Challenge: Exercise Time!#############################
 
 #1) Create a vector of the values of (e^x)*cos(x) at x = 3, 3.1, 3.2, . . . , 6.
-
+exp()
+x<-seq(3,6,0.1)
+vec <- exp(x)*cos(x)
 
 #2)Execute the following lines which create two vectors of random integers which are chosen with replacement
 #from the integers 0, 1, . . . , 999. Both vectors have length 250.
@@ -220,29 +223,53 @@ xVec <- sample(0:999, 250, replace=T)
 yVec <- sample(0:999, 250, replace=T)
 
 #2.a) Create the vector (y2 − x1, . . . , yn − xn−1).
+yVec_start2 <- yVec[2:250]
+xVec_end249 <- xVec[1:249]
+yVec_start2-xVec_end249
 
 #2.b) Create the vector (sin(y1)/cos(x2),sin(y2)/cos(x3), . . . ,sin(yn−1)/cos(xn)).
 
+
 #2.c) Create the vector (x1 + 2x2 − x3, x2 + 2x3 − x4, . . . , xn−2 + 2xn−1 − xn).
+x1 <- xVec[1:248]
+x2 <- xVec[2:249]
+x3 <- xVec[3:250]
+x1+2*x3-x3
 
 
 #3) 
 #3.a) Pick out the values in yVec which are > 600.
-
+yVec[yVec>600]
 #3.b) What are the index positions in yVec of the values which are > 600?
+yPos <- which(yVec > 600)
+yPos
 
 #3.c) What are the values in xVec which correspond to the values in yVec which are > 600? (By correspond,we mean at the same index positions.)
+xVec[yPos]
 
 #3.d) Create the vector (|x1 − x¯|^ 1/2  , |x2 − x¯|^ 1/2, . . . , |xn − x¯|^1/2) where x¯ denotes the mean of the vector
 #and x = (x1, x2, . . . , xn).
+x_bar = mean(xVec)
+(abs(xVec-x_bar))^(1/2)
+#Alternatively
+sqrt(abs(xVec-x_bar))
 
 #3.e) How many values in yVec are within 200 of the maximum value of the terms in yVec?
+y_max = max(yVec)
+y_within200ofmax <- which(yVec >= (y_max-200))
+length(y_within200ofmax) #This give you the number of values
 
 #3.f) How many numbers in xVec are divisible by 2? (Note that the modulo operator is denoted %%.)
+xVec%%2 #%% gives you the remainder of the division operations, if the remainder == 0, the number is divisible by 2
+which(xVec%%2==0)
+length(which(xVec%%2==0)) 
 
 #3.g) Sort the numbers in the vector xVec in the order of increasing values in yVec.
 
+
 #3.h) Pick out the elements in yVec at index positions 1, 4, 7, 10, 13, . . . .
+idx <- seq(1,250,3)
+yVec[idx]
 
 #For more challenges: http://www.dcc.fc.up.pt/~ines/aulas/1516/DM1/rexercises-1-R-basic.pdf
 
