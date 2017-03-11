@@ -71,4 +71,4 @@ anova(lm2, lm3)
 # 4. If there are any correlated attributes add the interaction between them to a new model 
 # Call this model lm2_ISI
 
-# Compare these two models and determine which model is better at predicting the size of the area burned
+# 5. Compare these two models and determine which model is better at predicting the size of the area burned
