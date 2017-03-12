@@ -14,8 +14,6 @@ View(MD)
 
 #1.2 Read the description files and understand what is each attributes.
 #Rename attributes if you find it helpful
-colnames(MD) <- c('Length.Of.Stay','Disease.Class','Comorbidities','Coma.Score','Care.Intensity','Mean.BP','WBC','Heart.Rate','Temperature','Blood.Gases','Albumin','Bilirubin','Creatinine','Sodium','Adjusted.Shock.Index','Age','Sex','Race','Death')
-
 
 #1.3 Check the class of each variables. 
 
@@ -36,7 +34,6 @@ colnames(MD) <- c('Length.Of.Stay','Disease.Class','Comorbidities','Coma.Score',
 
 
 #2.2.1 Temperature: mean imputation
-mean(MD$Temperature, na.rm = TRUE)
 
 
 #Additional question: why can we use mean imputation for temperature? Consider the disbribution of temp attribute.
@@ -51,9 +48,6 @@ mean(MD$Temperature, na.rm = TRUE)
 #Consider the real meaning of the attributes. Let's convert the attribute into a factor with two levels, ventilator patients and non-ventilator patients
 #Hint: you can use cut function. Type ?Cut to see the usage of the function
 # ventilator patients non-ventilator patients
-MD$Blood.Gases[which(is.na(MD$Blood.Gases))] <- 0
-max(MD$Blood.Gases)
-MD$Blood.Gases <- cut(MD$Blood.Gases, c(0, 32, 870))
 
 
 #In medical world, bili and albi are measured in the same test. 
