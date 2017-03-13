@@ -1,4 +1,4 @@
-fire <- read.csv("C:/Users/Student/Documents/forestfires.csv")
+fire <- read.csv("C:/Users/Student/Documents/UVA 2016-2017/RWorkshop/Week 5 - Introduction to Modeling/forestfires.csv")
 View(fire)
 
 #####################
@@ -51,7 +51,8 @@ lm3 <- lm(area~temp+FFMC+wind+(DC+DMC)^2+(ISI+FFMC)^2+(temp+FFMC)^2, data = xtm_
 summary(lm3)
 
 # compare models
-anova(lm1, lm2)
+anova(lm1, lm2) 
+# Large p-value means that the additional factors do not contribute to predicting the value of the response
 anova(lm1, lm3)
 anova(lm2, lm3)
 
@@ -59,16 +60,20 @@ anova(lm2, lm3)
 #
 # Practice Problems
 #
-####################
+###################
 
 # 1. Create a new subset that includes only with an ISI (inital spread index) greater than the median
 
-# 2. Create a linear model with area and wind as your predictors, and area as your response
+# 2. Plot the relationship between area and wind
+
+# 3. Add a linear regression line to the plot
+
+# 4. Create a linear model with wind as your predictor, and area as your response
 # Call this model lm1_ISI
 
-# 3. Determine if there are any correlated attributes
+# 5. Determine if there are any correlated attributes
 
-# 4. If there are any correlated attributes add the interaction between them to a new model 
+# 6. If there are any correlated attributes add the interaction between them to a new model 
 # Call this model lm2_ISI
 
-# 5. Compare these two models and determine which model is better at predicting the size of the area burned
+# 7. Compare these two models and determine which model is better at predicting the size of the area burned
