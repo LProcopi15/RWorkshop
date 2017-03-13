@@ -11,6 +11,7 @@ View(fire)
 summary(fire)
 # No NA's, all numeric data is normalized
 
+
 # Check class of each attribute
 for (i in 1:ncol(fire)){
   print(paste(colnames(fire[i]), ": ", class(fire[,i]),sep = ""))
@@ -22,6 +23,12 @@ areabox <- boxplot(fire$area)
 upperwhisk <- areabox$stats[5,]
 
 xtm_fire <- subset(fire, area >= upperwhisk, select = c('FFMC', 'DMC', 'DC', 'ISI', 'temp', 'RH', 'wind', 'rain', 'area'))
+
+# Transforming the data
+hist(fire$area) # highly skewed to the left
+hist(log(fire$area))
+
+fire$area_log <- log(fire$area + 0.1)
 
 ####################
 #
@@ -38,7 +45,16 @@ abline(lm1, col = "orange")
 # Statistical information about this lm
 summary(lm1)
 
-# Can add many more factors to this lm
+# Plot two variables
+plot(fire$temp, fire$area_log)
+# Create linear regression model between the two
+lm1_log <- lm(area_log~temp, data = fire)
+# Add regression line to plot
+abline(lm1_log, col = "orange")
+# Statistical information about this lm
+summary(lm1_log)
+
+# Can add many more factors to any lm
 lm2 <- lm(area~temp+FFMC+wind, data = xtm_fire)
 summary(lm2)
 
@@ -51,7 +67,8 @@ lm3 <- lm(area~temp+FFMC+wind+(DC+DMC)^2+(ISI+FFMC)^2+(temp+FFMC)^2, data = xtm_
 summary(lm3)
 
 # compare models
-anova(lm1, lm2) 
+anova(lm1, lm1_log) 
+anova(lm1, lm2)
 # Large p-value means that the additional factors do not contribute to predicting the value of the response
 anova(lm1, lm3)
 anova(lm2, lm3)
