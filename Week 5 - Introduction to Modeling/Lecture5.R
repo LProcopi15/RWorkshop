@@ -1,4 +1,4 @@
-fire <- read.csv("/Users/yuyanzhang/Desktop/RWorkshop/Week 5 - Introduction to Modeling/forestfires.csv")
+fire <- read.csv("C:/Users/Student/Documents/UVA 2016-2017/RWorkshop/Week 5 - Introduction to Modeling/forestfires.csv")
 View(fire)
 
 #####################
@@ -9,7 +9,7 @@ View(fire)
 
 # Get summary information
 summary(fire)
-# No NA's, all numeric data is normalized
+# No NA's
 
 # Check class of each attribute
 for (i in 1:ncol(fire)){
@@ -56,6 +56,9 @@ anova(lm1, lm2)
 anova(lm1, lm3)
 anova(lm2, lm3)
 
+hist(fire$area)
+hist(log(fire$area))
+summary(lm1)
 
 #####################
 #
@@ -64,21 +67,30 @@ anova(lm2, lm3)
 ###################
 
 # 1. Create a new subset that includes only with an ISI (inital spread index) greater than the median
+ISI_box <- boxplot(fire$ISI)
+median_ISI <- ISI_box$stats[3,]
+high_ISI <- subset(fire, ISI >= median_ISI)
 
 # 2. Plot the relationship between area and wind
+plot(high_ISI$wind, high_ISI$area)
 
 # 3. Add a linear regression line to the plot
+abline(lm(area~wind, data = high_ISI), col = "Orange")
 
 # 4. Create a linear model with wind as your predictor, and area as your response
 # Call this model lm1_ISI
+lm1_ISI <- lm(area~wind, data = high_ISI)
 
 # 5. Determine if there are any correlated attributes
+symnum(cor(high_ISI[c("FFMC", "DMC", "DC", "ISI", "temp", "RH", "wind", "rain")]))
 
 # 6. If there are any correlated attributes add the interaction between them to a new model 
-# Call this model lm2_ISI
+# Call this model lm2_ISI - RH and temp
+lm2_ISI <- lm(area~wind+(RH+temp)^2, data = high_ISI)
 
 # 7. Compare these two models and determine which model is better at predicting the size of the area burned
-
+anova(lm1_ISI, lm2_ISI)
+# p-value = 0.3004; therefore lm1 is better 
 
 #####################
 #
