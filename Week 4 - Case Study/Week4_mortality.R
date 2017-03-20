@@ -101,7 +101,15 @@ which(MD$race=="")
 
 #3.2 Create boxplots of numeric variables against attribute death
 #For example: create a boxplot of bili versus death. How does the value of bili influence the chance of mortality?
+num_vec <- MD[c('meanbp', 'bili')]
 
+par(2,2)
+for(i in 1:ncol(num_vec)) {
+  boxplot(num_vec[,i], MD$death.y)
+}
+
+
+boxplot(MD$bili, MD$death.y)
 
 #3.3 Create tables of factor variables against attribute death
 #Example: Within each age group, how many patient passed away/survived?
