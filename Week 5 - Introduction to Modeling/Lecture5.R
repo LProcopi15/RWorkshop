@@ -20,7 +20,6 @@ for (i in 1:ncol(fire)){
 summary(fire$area)
 areabox <- boxplot(fire$area)
 upperwhisk <- areabox$stats[5,]
-
 xtm_fire <- subset(fire, area >= upperwhisk, select = c('FFMC', 'DMC', 'DC', 'ISI', 'temp', 'RH', 'wind', 'rain', 'area'))
 
 ####################
@@ -83,6 +82,7 @@ lm1_ISI <- lm(area~wind, data = high_ISI)
 
 # 5. Determine if there are any correlated attributes
 symnum(cor(high_ISI[c("FFMC", "DMC", "DC", "ISI", "temp", "RH", "wind", "rain")]))
+?symnum
 
 # 6. If there are any correlated attributes add the interaction between them to a new model 
 # Call this model lm2_ISI - RH and temp
@@ -100,13 +100,18 @@ anova(lm1_ISI, lm2_ISI)
 
 #Suppose we want to develop a model to predict the area and also using month and day attributes
 class(fire$month)
+levels(fire$month)
 contrasts(fire$month)
 class(fire$day)
 contrasts(fire$day)
 
+lm(area~temp+month+day, data = fire)
+
 #Get the right dataset
 xtm_fire_withCategorical <- subset(fire, area >= upperwhisk, select = c('FFMC', 'DMC', 'DC', 'ISI', 'temp', 'RH', 'wind', 'rain', 'area','month','day'))
 lm4 <- lm(area~temp+FFMC+wind+(DC+DMC)^2+(ISI+FFMC)^2+(temp+FFMC)^2+month+day, data = xtm_fire_withCategorical)
+summary(lm4)  
+
 
 #Practice problem: is lm4 better than lm3? How do you know?
 
@@ -149,6 +154,7 @@ pmse.lm.train
 
 #Practice question: how does pmse.lm.train compared to the MSE on the training set? Which value better represents the robustness of the model?
 #Hint: use mean((lm.train$residuals)^2) to compute the MSE on training set
+mean((lm.train$residuals)^2)
 
 #####################
 #
