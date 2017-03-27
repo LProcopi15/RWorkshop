@@ -162,15 +162,32 @@ mean((lm.train$residuals)^2)
 #
 ###################
 #1. Develop a linear model to predict the rain, using all attributes (hint: you can write the formula this way: lm(rain~., data = fire) to indicate you are using all attributes)
-
+lm.rain <- lm(rain~., data = fire)
 #2. Look at the summary of the model. Which attributes are statistically significant? (with p-value < 0.05)
-
+summary(lm.rain)
 #3. Develop a linear model only using attributes that are statistically significant
-
+lm.rain.reduced <- lm(rain~day+temp+RH, data = fire)
 #4. Compare model 1 and model 3. Are they statistically different? Which one would you choose?
+summary(lm.rain)
+summary(lm.rain.reduced)
+anova(lm.rain,lm.rain.reduced) #Not statistically different because anova gives a p-value of 0.515. Choose the simpler model to avoid overfitting
 
 #5. Split the dataset into trainning and testing set. Then use the training set to train the model you selected. 
+set.seed(1234)
+sample_size <- floor(0.75*nrow(fire))
+train_idx <- sample(seq(nrow(fire)),size = sample_size)
+train_data <- fire[train_idx,]
+test_data <- fire[-train_idx,]
 
+rain.train <- lm(rain~day+temp+RH, data = train_data)
+summary(rain.train)
 #6. Generate predictions for the testing sets.
+rain_pred <- predict(rain.train,test_data)
 
 #7. Compute the mean squared error of the predictions
+mse <- function(p, r)
+{
+  mean((p-r)^2)
+  
+}
+mse(rain_pred,test_data$rain)
