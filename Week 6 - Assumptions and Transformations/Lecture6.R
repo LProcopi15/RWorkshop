@@ -38,8 +38,8 @@ AIC(lm1,k=log(nrow(xtm_fire))) # 840.9733
 AIC(lm3,k=log(nrow(xtm_fire))) # 872.0552
 
 # adj-R2 - closer to 1 is better
-summary(lm1)$adj.r.squared
-summary(lm3)$adj.r.squared
+summary(lm1)$adj.r.squared # 0.04932201
+summary(lm3)$adj.r.squared # -0.05481489
 
 
 ######################
@@ -47,19 +47,76 @@ summary(lm3)$adj.r.squared
 # Transformations and Modeling
 #
 #####################
-
-# Stepwise
-lm.cas2.step<-step(lm.cas2)
-
-# Box-cox
+# Box-cox transformation: used to increase normality of a dataset
 library(MASS)
-boxcox(lm1) 
-# Value near 0 thus we need to perform a log transform
 
 #The best lambda
-L<-boxcox(accdmg.lm1, plotit = F)$x[which.max(boxcox(accdmg.lm1, plotit = F)$y)] 
+L<-boxcox(lm3, plotit = F)$x[which.max(boxcox(lm3, plotit = F)$y)] 
 L
 
 # Box-cox transform
-xdmgnd.lm1.boxcox<-lm(ACCDMG^L ~TEMP + TRNSPD + TONS + CARS + HEADEND1,data=xdmgnd)
-summary(xdmgnd.lm1.boxcox)
+fire.lm1.boxcox <- lm(area^L~., data = xtm_fire)
+summary(fire.lm1.boxcox)
+
+# Look at new diagnostics
+par(mfrow=c(2,2))
+plot(fire.lm1.boxcox, labels.id = NULL)
+par(mfrow=c(1,1))
+
+# Stepwise regression
+lm1.step <-step(lm3)
+summary(lm1.step)
+
+# Again we can compare these models using multiple aproaches
+AIC(fire.lm1.boxcox)
+AIC(lm1)
+AIC(lm1.step)
+
+# Logistic regression
+fert <- read.csv("C:/Users/Student/Documents/UVA 2016-2017/RWorkshop/Week 6 - Assumptions and Transformations/fertility_Diagnosis.txt", header = FALSE)
+View(fert)
+
+colnames(fert) <- c("season", "age", "childish.disease", "accident", "surgical", "fevers", "alcohol", "smoking", "hours.sitting", "output")
+
+# Recode the response
+class(fert$output)
+fert$output <- as.character(fert$output)
+fert$output[which(fert$output == "N")] <- 0
+fert$output[which(fert$output == "O")] <- 1
+fert$output <- as.integer(fert$output)
+
+# Binary logistic regression (logistic regression) model: gives the log-odds on the event
+fert.glm <- glm(output~., family = binomial(link = "logit"), data = fert)
+summary(fert.glm)
+
+######################
+#
+# Practice Problems
+#
+#####################
+# Use the fertility data for these
+
+# 1. Split the data into a training set (70%) and testing set (30%)
+
+# Use the training set to build your models
+# 2. Create a general linear regression model with output as the response and all the other attributes as a predictor
+
+# 3. Determine correlation between attributes
+
+# 4. Add an interaction term with hours.sitting and age 
+
+# 5. Perform a step-wise regression on the model from Q3
+
+# 6. Create a new logistic regression model using the training data
+
+# 7. Create diagnostic plots for all models 
+
+# 8. Compare the models using AIC
+
+# 9. Compare the models using BIC
+
+# 10. Compare the models using ajd-R2 (won't work for logistic)
+
+# 11. Use the first linear regression model and for the logistic regression model to predict test values
+
+# 12. Compare these two models using MSE
