@@ -89,6 +89,16 @@ fert$output <- as.integer(fert$output)
 fert.glm <- glm(output~., family = binomial(link = "logit"), data = fert)
 summary(fert.glm)
 
+
+# Prediction using logistic regression model
+fert.pred <- predict(fert.glm, type = "response")
+# Score table: gives the values of false positive, false negative, true positive and true negative
+# Based on a specific cut off probability: 0.3 means that R should classify all probabilities of less than 0.3 as false and greater than 0.3 as true
+score.table(fert.pred,fert$output,0.3)
+# ROC plot: Ratio of true positives to false positives
+# Upper right-hand corner is an ideal curve
+plot.roc(fert.pred, fert$output, main = "ROC Curve - Fertility", col = "blue")
+
 ######################
 #
 # Practice Problems
@@ -117,6 +127,12 @@ summary(fert.glm)
 
 # 10. Compare the models using ajd-R2 (won't work for logistic)
 
-# 11. Use the first linear regression model and for the logistic regression model to predict test values
+# 11. Use the first and second linear regression model to predict test values
 
 # 12. Compare these two models using MSE
+
+# 13. Using your logistic regression model construct a confusion matrix
+
+# 14. Using your logistic regression model construct a ROC curve
+
+# 15. Compare the logistic regression model you made with the one we constructed as a class using ROC and confusion matrix
