@@ -136,3 +136,5 @@ plot.roc(fert.pred, fert$output, main = "ROC Curve - Fertility", col = "blue")
 # 14. Using your logistic regression model construct a ROC curve
 
 # 15. Compare the logistic regression model you made with the one we constructed as a class using ROC and confusion matrix
+# Hint: use lines.roc to add a second line to the same plot
+# One ROC is superior to the other if it is farther left/up on every point
