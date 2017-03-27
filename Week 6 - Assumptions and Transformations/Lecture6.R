@@ -48,6 +48,7 @@ summary(lm3)$adj.r.squared # -0.05481489
 #
 #####################
 # Box-cox transformation: used to increase normality of a dataset
+install.packages("MASS")
 library(MASS)
 
 #The best lambda
@@ -89,15 +90,30 @@ fert$output <- as.integer(fert$output)
 fert.glm <- glm(output~., family = binomial(link = "logit"), data = fert)
 summary(fert.glm)
 
+# Functions and packages for predicting using logistic regression
+score.table = function(p, r, threshold)
+{
+  Pred <- p > threshold
+  Actual <- r
+  cat("Actual vs. Predicted", fill = T)
+  table(Actual,Pred)
+}
+
+install.packages("pROC")
+library(pROC)
 
 # Prediction using logistic regression model
-fert.pred <- predict(fert.glm, type = "response")
+fert.pred <- predict(fert.glm, type = 'response' )
 # Score table: gives the values of false positive, false negative, true positive and true negative
 # Based on a specific cut off probability: 0.3 means that R should classify all probabilities of less than 0.3 as false and greater than 0.3 as true
 score.table(fert.pred,fert$output,0.3)
 # ROC plot: Ratio of true positives to false positives
 # Upper right-hand corner is an ideal curve
-plot.roc(fert.pred, fert$output, main = "ROC Curve - Fertility", col = "blue")
+# Option 1:
+MyROC <- roc(fert$output, fert.pred)
+plot(MyROC, main = "ROC Plot - Fertitility")
+# Option 2:
+plot.roc(fert$output, fert.pred, main = "ROC Plot - Fertitility", col = "blue")
 
 ######################
 #
@@ -109,7 +125,7 @@ plot.roc(fert.pred, fert$output, main = "ROC Curve - Fertility", col = "blue")
 # 1. Split the data into a training set (70%) and testing set (30%)
 
 # Use the training set to build your models
-# 2. Create a general linear regression model with output as the response and all the other attributes as a predictor
+# 2. Create a linear regression model with output as the response and all the other attributes as a predictor
 
 # 3. Determine correlation between attributes
 
