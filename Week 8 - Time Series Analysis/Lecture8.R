@@ -32,7 +32,8 @@ abline(bike.trend,col='red') # Overall upward trend
 
 # 2. Modeling for seasonality
 
-# Get the periodogram from bike.ts
+# Get the periodogram from bike.ts 
+# Periodograms 'examining frequency-domain models of an equi-spaced time series.'
 pg.bike<-spec.pgram(bike.ts,spans=9,demean=T,log='no')
 
 # Find the peak, max.omega.bike
@@ -42,33 +43,7 @@ max.omega.bike<-pg.bike$freq[which(pg.bike$spec==max(pg.bike$spec))]
 1/max.omega.bike # 23.97; there is a repeating cycle every ~24 days
 
 # Conclusion: there is both seasonality and trend in this data set - need to address both of these in the model
-# Get the residuals for trend
-e.ts.bike <- ts(bike.trend$residuals)
-
-
-# Plot autocorrelation (acf) and partial autocorrelation (pacf)
-par(mfrow=c(1,2))
-acf(e.ts.bike, main="ACF of Residuals from e.ts.bike")
-pacf(e.ts.bike,main="PACF of Residuals from e.ts.bike")
-par(mfrow=c(1,1))
-
-# Use the ACF and PACF to choose a model type
-# See table for details
-# ACF is sidusodial and PACF cannot see any trends
-# Choose AR or ARMA
-
-# Choose r values for AR model
-# ar(3) p=3
-bike.ar3 <- arima(e.ts.bike, order=c(4,0,0))
-summary(bike.ar3)
-AIC(bike.ar3)
-
-# Use the auto.arima from 'forecast' library- Automatically find p, q, & d terms
-library('forecast')
-bike.auto <- auto.arima(e.ts.bike, trace=TRUE)
-# Using autoregressive function the best model is ARIMA(2,1,1)
-AIC(bike.auto)
-
+# Create a seasonality model
 # Transform weekly info
 Day <- rep(NA, length(bike.ts)-7)
 Day[which((time.bike %% 7)  == 1)] <- "Sat"  
@@ -88,21 +63,96 @@ contrasts(Day)
 bike.season<- lm(bike.ts[time.bike]~Day)
 summary(bike.season)
 
-# Get the residuals from the bike.season model above and store in e.ts.bike2:
-e.ts.bike2 <- ts(bike.season$residuals)
+# Combine the trend model with the seasonal model (because both trend and seasonilty were significant)        
+bike.trendseason <-lm(bike.ts[time.bike]~time.bike+Day)
+summary(bike.trendseason)
 
-# Plot acf and pacf side by side for easier examination
+# Get the residuals for this model
+# An assumption for linear modeling is that the residuals are not correlated
+# However, often in time series data that is not true thus we need to check for correlation in the residuals
+e.ts.bike <- ts(bike.trendseason$residuals)
+
+# Plot autocorrelation (acf) and partial autocorrelation (pacf)
+# ACF and PACF measure the correlation of residuals and give incite into which models to use (see diagram)
 par(mfrow=c(1,2))
-acf(e.ts.bike2, main="ACF of Residuals from bike.season")
-pacf(e.ts.bike2,main="PACF of Residuals from bike.season")
+acf(e.ts.bike, main="ACF of Residuals from e.ts.bike")
+pacf(e.ts.bike,main="PACF of Residuals from e.ts.bike")
 par(mfrow=c(1,1))
 
-# Sinusodial decay on ACF and not on PACF - AR or ARMA
-bike.arma13 <- arima(e.ts.bike2, order=c(1,0,3))
+# ACF is sidusodial decay
+# PACF cannot see any trends
+# Choose AR or ARMA
+
+# Autoregressive: AR(p) models: "The AR model establishes that a realization at time t is a linear combination of the p previous realization plus some noise term."
+# Moving Average: MA(q): "can define correlated noise structure in our data and goes beyond the traditional assumption where errors are iid."
+# ARMA: combines autoregressive and moving average terms
+# ARIMA: combines autoregressive and moving average terms when the data in non-stationary - i.e. mean, variance, autocorrelation, etc. are not constant overtime
+
+# Choose p values for AR model
+# ar(3) p=3
+bike.ar3 <- arima(e.ts.bike, order=c(3,0,0))
+summary(bike.ar3)
+
+# Choose p and r values for ARMA model
+bike.arma13 <- arima(e.ts.bike, order = c(1,0,3))
+summary(bike.arma13)
 
 # Use the auto.arima from 'forecast' library- Automatically find p, q, & d terms
-bike2.auto <- auto.arima(e.ts.bike2, trace=TRUE)
-# Best model is ARIMA(2,1,1) 
+library('forecast')
+bike.auto <- auto.arima(e.ts.bike, trace=TRUE)
+# Using autoregressive function the best model is ARIMA(2,1,1)
+
+# Compare time series models using AIC and BIC
+AIC(bike.trendseason)
+AIC(bike.auto) # 206349
+AIC(bike.ar3) # 204358.6
+AIC(bike.arma13) # 204264.8
+
+AIC(bike.trendseason, k = log(length(bike.ts))) # 228669.7
+AIC(bike.auto, k = log(length(e.ts.bike))) # 206380
+AIC(bike.ar3, k = log(length(e.ts.bike))) # 204397.4
+AIC(bike.arma13, k = log(length(e.ts.bike))) # 204311.4
+
+# Best model is the bike.arma13 [ARMA(1,3)]
+
+###################
+#
+# Prediction using ts
+#
+###################
+
+# Create a dataframe which is a 1 week period (recall we removed a week previously)
+next.week.time<-c((length(bike.ts)-6):(length(bike.ts)))
+
+# the test data frame
+next.week<-data.frame(time.bike = next.week.time, count = bike.ts[next.week.time])
+
+# Prediction for the next week by bike.arma13:
+E_Y.pred<-predict(bike.trend,newdata=next.week)
+e_t.pred<-forecast(bike.arma13,h=7)
+next.week.prediction<-E_Y.pred+e_t.pred$mean
+
+# MSE:
+# can compute mse based on predicted error minus counts 
+mean((next.week.prediction-next.week$count)^2) 
+# MSE is 22592
+
+####################
+#
+# Assumption checking
+#
+####################
+
+# Autocorrelation has been accounted for - all p-values for L-B are below significance line
+tsdiag(bike.arma13,gof.lag=20)
+
+# Recheck ACF and PACF for residuals
+par(mfrow=c(1,2))
+acf(bike.arma13$residuals, main="ACF of Residuals from bike.arma13")
+pacf(bike.arma13$residuals,main="PACF of Residuals from bike.arma13")
+par(mfrow=c(1,1))
+# 1. Looking for no pattern - i.e. not exponential or sinusidal decay 
+# 2. Looking for insignficant lags - i.e. below the blue line 
 
 ###################
 #
@@ -110,7 +160,7 @@ bike2.auto <- auto.arima(e.ts.bike2, trace=TRUE)
 # 
 ###################
 
-# 1. Create a time series dataset base on 'causual'
+# 1. Create a time series dataset bases on 'causual'
 
 # 2. Create a model for the trend
 
@@ -118,20 +168,18 @@ bike2.auto <- auto.arima(e.ts.bike2, trace=TRUE)
 
 # 4. Determine if trend is significant
 
-# 5. Obtain the residuals from the trend model
+# 5. Create a periodgram for this data set
 
-# 6. Plot the ACF and the PACF for this model and determine if AR, ARMA, or ARIMa should be used
+# 6. Determine if seasonality is significant
 
-# 7. Use auto.arima to determine the optimal model; also create a few other models with varying values for p, q and r
+# 7. Create a model based on which terms are significant - seasonality, trend or both
 
-# 8. Compare models using AIC, BIC and adjs-R2
+# 8. Obtain the residuals for this model and plot the ACF and PACF
 
-# 9. Create a periodgram for this data
+# 9. Based on the ACF and PACF determine which model should be used (AR, MA, ARMA or ARIMA) and create them
 
-# 10. Determine if seasonality is significant
+# 10. Create a model using the auto-arima function
 
-# 11. Obtain the residuals, plot the ACF and PACF and interpret them
+# 11. Compare the models using AIC and BIC - conclude which is best
 
-# 12. Create appropriate models for seasonality
-
-# 13. Compare models using AIC, BIC and adjst-R2
+# 12. Predict the next weeks casual user count
