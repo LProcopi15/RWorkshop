@@ -5,12 +5,17 @@
 
 ######Step 1: Data exploration############
 #1.1 Load the data
-fb <- read.table("/Users/yuyanzhang/Desktop/RWorkshop/Week 7 - Case Study (regression modeling)/dataset_Facebook.csv", sep = ";", header = TRUE)
+fb <- read.table("C:/Users/Student/Documents/UVA 2016-2017/RWorkshop/Week 7 - Case Study (regression modeling)/dataset_Facebook.csv", sep = ";", header = TRUE)
 #The header = TRUE parameter will tell R to read the first line in the file as the header of the dataset
 View(fb)
 
 #1.2 Check the class of each attribute
+check.class <- function(dataset) {
+  for(i in 1:ncol(dataset))
+    print(paste(colnames(dataset[i]), ": ", class(dataset[,i]), sep = ""))
+}
 
+check.class(fb)
 #Is there any attribute that needs recoding?
 
 
